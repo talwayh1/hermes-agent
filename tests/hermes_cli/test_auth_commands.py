@@ -1590,6 +1590,19 @@ def test_auth_remove_copilot_suppresses_all_variants(tmp_path, monkeypatch):
     hermes_home.mkdir(parents=True, exist_ok=True)
     monkeypatch.setenv("HERMES_HOME", str(hermes_home))
 
+    # Mock copilot token resolution so the gh_cli borrowed-source entry
+    # survives _prune_stale_seeded_entries() inside load_pool().
+    # Without this, resolve_copilot_token returns ("", "") in CI/test
+    # environments, the entry is pruned, and resolve_target("1") fails.
+    monkeypatch.setattr(
+        "hermes_cli.copilot_auth.resolve_copilot_token",
+        lambda: ("ghp_fake", "gh auth token"),
+    )
+    monkeypatch.setattr(
+        "hermes_cli.copilot_auth.get_copilot_api_token",
+        lambda token: token,
+    )
+
     _write_auth_store(
         tmp_path,
         {
