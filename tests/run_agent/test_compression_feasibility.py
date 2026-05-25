@@ -272,6 +272,10 @@ def test_init_feasibility_check_uses_aux_context_override_from_config():
 
     assert agent._aux_compression_context_length_config == 1_000_000
 
+    # The feasibility probe is deferred — drive it manually so the mock
+    # records the call shape for the assertion below.
+    agent._check_compression_model_feasibility()
+
     # Since #12977 the main model context is also probed.  Only the
     # auxiliary-model call shape is governed by this test.
     mock_ctx_len.assert_any_call(
